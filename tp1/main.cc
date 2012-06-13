@@ -64,6 +64,6 @@ int main (int argc, char **argv)
   string fileName(argv[1]);
   cout << fileName << endl;
   Glib::RefPtr<Gdk::Pixbuf> pbuf = Gdk::Pixbuf::create_from_file(fileName);
-  dimensionFractal(pbuf, 25);
+  dimensionFractal(pbuf, 250);
   return 0;
 }
