@@ -32,7 +32,9 @@ void dimensionFractal(Glib::RefPtr<Gdk::Pixbuf> pbuf, int dark)
 {
   int side, row, col, painted;
   int bigbox = 1;
-  for(bigbox=1;bigbox < pbuf->get_width() || bigbox < pbuf->get_height(); bigbox *= 2);
+  double d_side;
+  for(bigbox=1;bigbox <= pbuf->get_width() && bigbox <= pbuf->get_height(); bigbox *= 2);
+  bigbox /= 2;
 
   for(side=1;side<bigbox; side *= 2)
   { // Iterar por los tamanyos de box
@@ -47,11 +49,12 @@ void dimensionFractal(Glib::RefPtr<Gdk::Pixbuf> pbuf, int dark)
         }
       }
     }
-
-    double log_1_side = log(1. / (((double) side) / ((double) bigbox)));
+    //d_side = ((double) side) / ((double) bigbox);
+    //double log_1_side = log(1. / (((double) side) / ((double) bigbox)));
+    double log_1_side = log(bigbox / ((double) side));
     double log_painted = log(painted);
     double dim = log_painted / log_1_side;
-    cout << log_1_side << " " << log_painted << " " << dim << endl;
+    cout << side << " " << painted << " " << log_1_side << " " << log_painted << " " << dim << endl;
   }
 }
 
@@ -61,6 +64,6 @@ int main (int argc, char **argv)
   string fileName(argv[1]);
   cout << fileName << endl;
   Glib::RefPtr<Gdk::Pixbuf> pbuf = Gdk::Pixbuf::create_from_file(fileName);
-  dimensionFractal(pbuf, 250);
+  dimensionFractal(pbuf, 25);
   return 0;
 }
