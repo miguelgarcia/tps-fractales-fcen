@@ -3,107 +3,116 @@
 
 using namespace std;
 #define pow2(x) ((x)*(x))
-#define max(x,y) ((x) > (y) ? (x) : (y))
 
-void putpixel(Glib::RefPtr<Gdk::Pixbuf> pbuf, int x, int y,
-  guint8 r, guint8 g, guint8 b)
-{
-  if(x >= 0 && x < pbuf->get_width() && y >= 0 && y < pbuf->get_height())
-  {
-    int rowstride = pbuf->get_rowstride();
-    guint8 *pixels = pbuf->get_pixels();
-    pixels[y * rowstride + x * 3] = r; 
-    pixels[y * rowstride + x * 3 + 1] = g; 
-    pixels[y * rowstride + x * 3 + 2] = b; 
-  }
-}
-
-void putline(Glib::RefPtr<Gdk::Pixbuf> pbuf, int x0, int y0, int x1, int y1,
-  guint8 r, guint8 g, guint8 b)
-{
-  if(x0 == x1 && y0 == y1)
-    return;
-  int rowstride = pbuf->get_rowstride();
-  guint8 *pixels = pbuf->get_pixels();
-  int lineY = y0;
-  for(int lineX = x0; lineX != x1; lineX += (x0 < x1 ? 1 : -1))
-  {
-    if(lineX >= 0 && lineX < pbuf->get_width() && lineY >= 0 && lineY < pbuf->get_height())
-    {
-      pixels[lineY * rowstride + lineX * 3] = r; 
-      pixels[lineY * rowstride + lineX * 3 + 1] = g; 
-      pixels[lineY * rowstride + lineX * 3 + 2] = b;
-    }
-    lineY += (y0 < y1 ? 1 : -1);
-  }
-  putpixel(pbuf, x0, y0, 0, 255, 0);
-}
-
-void graficar(Glib::RefPtr<Gdk::Pixbuf> pbuf, string formulaX, string formulaY,
-  double p0[], double p1[], unsigned int semillas, unsigned int iteraciones)
+void graficar_trayectorias(Cairo::RefPtr<Cairo::Context> cr,
+        FunctionParser &funcionX, FunctionParser &funcionY,
+        double p0[], double p1[], unsigned int semillas, unsigned int iteraciones)
 {
   double minX = p0[0], minY = p0[0];
   double maxX = p1[0], maxY = p1[1];
   double incX = (maxX - minX) / semillas;
   double incY = (maxY - minY) / semillas;
-  double x, y;
+  double width = maxX- minX;
+  double seedX, seedY;
   double newX, newY;
   double vars[2];
-  unsigned int pbuf_width = pbuf->get_width();
-  unsigned int pbuf_height = pbuf->get_height();
-  FunctionParser fparserX, fparserY;
-
-  if(formulaX == "" || formulaY == "")
-    return;
-
-  int res = fparserX.Parse(formulaX, "x,y");
-  if(fparserX.EvalError() < 0)
+  cr->set_source_rgb(0,0,1);
+  for(seedX=minX + incX/2; seedX < maxX; seedX+=incX)
   {
-    std::cout << fparserX.ErrorMsg() << "\n\n";
-    return;
-  }
-  res = fparserY.Parse(formulaY, "x,y");
-  if(fparserY.EvalError() < 0)
-  {
-    std::cout << fparserY.ErrorMsg() << "\n\n";
-    return;
-  }
-  fparserX.Optimize();
-  fparserY.Optimize();
-  cout << "Graficando" << endl;
-  double maxInc = max(incX, incY);
-  int pixOldX, pixOldY;
-  for(x=minX + incX/2; x < maxX; x+=incX)
-  {
-    for(y=minY + incY/2; y < maxY; y+=incY)
+    for(seedY=minY + incY/2; seedY < maxY; seedY+=incY)
     {
-      // elegir punto inicial
-      newX = x+(rand()%100)*incX/100.;
-      newY = y+(rand()%100)*incY/100.;
+      // elegir punto inicial (pertutbado)
+      newX = seedX+(rand()%100)*incX/100.;
+      newY = seedY+(rand()%100)*incY/100.;
       vars[0] = newX;
       vars[1] = newY;
+      cr->move_to(newX, newY);
       for(unsigned int i = 0; i < iteraciones; i++)
       {
-        newX = fparserX.Eval(vars);
-        newY = fparserY.Eval(vars);
+        newX = funcionX.Eval(vars);
+        newY = funcionY.Eval(vars);
         double norm = sqrt(pow2(newX-vars[0])+pow2(newY-vars[1]));
         if(norm > 0)
         {
           // Moverse por el vector normalizado
-          vars[0] += (newX / norm);
-          vars[1] += (newY / norm);
+          vars[0] += newX / norm;
+          vars[1] += newY / norm;
         }
-        int pixX = (vars[0]-minX) / (maxX - minX) * pbuf_width;
-        int pixY = (vars[1]-minY) / (maxY - minY) * pbuf_height;
-        unsigned int color = 20. * min(12., norm);
-        if(i > 0)
-        {
-          putline(pbuf, pixX, pixY, pixOldX, pixOldY, color, 0, 0);
-        }
-        //putpixel(pbuf, pixX, pixY, color, 0, 0);
-        pixOldX = pixX;
-        pixOldY = pixY;
+        double color = norm/width;
+        cr->set_source_rgb(color,4*(1-color)*color,1-color);
+        cr->rel_line_to(vars[0], vars[1]);
+        cr->stroke();
+        cr->move_to(vars[0], vars[1]);
       }
     }
   }
+}
+
+
+/**
+ * Inicializa la transformacion de coordenadas de reales a pixeles y pone en
+ * blanco el fondo de la imagen.
+ * 
+ * @param cr
+ * @param width
+ * @param height
+ * @param p0
+ * @param p1
+ */
+void inicializar_cairo(Cairo::RefPtr<Cairo::Context> cr,
+        guint32 width, guint32 height,
+        double p0[], double p1[])
+{
+    //fondo blanco :)
+  cr->set_source_rgb(1, 1, 1);
+  cr->rectangle(0, 0, width, height);
+  cr->fill();
+  
+  // Escala y posicion
+  double sx = width / (p1[0] - p0[0]);
+  double sy = height / (p1[1] - p0[1]);
+  cr->translate(-p0[0] * sx, -p0[1] * sy);
+  cr->scale(sx, sy);
+  cr->set_line_width(0.0005*(p1[0] - p0[0]));
+}
+
+FunctionParser parsear_formula(string formula)
+{
+  FunctionParser parser;
+  parser.Parse(formula, "x,y");
+  if(parser.EvalError() < 0)
+  {
+    std::cout << parser.ErrorMsg() << "\n\n";
+  }
+  parser.Optimize();
+  return parser;
+}
+/**
+ * Genera el grafico de trayectoris de un DS 2D.
+ * 
+ * @param width
+ * @param height
+ * @param formulaX
+ * @param formulaY
+ * @param p0
+ * @param p1
+ * @param semillas
+ * @param iteraciones
+ * @return 
+ */
+Glib::RefPtr<Gdk::Pixbuf> graficar(guint32 width, guint32 height,
+        string formulaX, string formulaY,
+        double p0[], double p1[],
+        unsigned int semillas, unsigned int iteraciones)
+  {
+  Cairo::RefPtr<Cairo::ImageSurface> imSur = Cairo::ImageSurface::create(Cairo::FORMAT_RGB24, width, height);
+  Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create(imSur);
+
+  inicializar_cairo(cr, width, height, p0, p1);
+
+  FunctionParser funcionX = parsear_formula(formulaX);
+  FunctionParser funcionY = parsear_formula(formulaY);
+
+  graficar_trayectorias(cr, funcionX, funcionY, p0, p1, semillas, iteraciones);
+  return Gdk::Pixbuf::create(imSur, 0, 0, width, height);
 }
