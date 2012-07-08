@@ -21,7 +21,7 @@ void graficar_trayectorias(Cairo::RefPtr<Cairo::Context> cr,
   {
     for(seedY=minY + incY/2; seedY < maxY; seedY+=incY)
     {
-      // elegir punto inicial (pertutbado)
+      // elegir punto inicial (perturbado)
       newX = seedX+(rand()%100)*incX/100.;
       newY = seedY+(rand()%100)*incY/100.;
       vars[0] = newX;
@@ -36,15 +36,12 @@ void graficar_trayectorias(Cairo::RefPtr<Cairo::Context> cr,
         double norm = sqrt(pow2(newX-vars[0])+pow2(newY-vars[1]));
 
         double color = norm/width;
-        //cr->set_source_rgba(color,4*(1-color)*color,1-color, 0.5);
         if(norm > 0)
         {
           // Moverse por el vector normalizado
           vars[0] += ((newX-vars[0]) / norm) * radio;
           vars[1] += ((newY-vars[1]) / norm) * radio;
         }
-        //cr->rel_line_to(vars[0], vars[1]);
-        //cr->stroke();
         cr->set_source_rgba(color,4*(1-color)*color,1-color, alfa);
         cr->arc(vars[0], vars[1], radio, 0,  2 * M_PI);
         cr->fill();
@@ -87,8 +84,8 @@ void inicializar_cairo(Cairo::RefPtr<Cairo::Context> cr,
 FunctionParser parsear_formula(string formula)
 {
   FunctionParser parser;
-  parser.Parse(formula, "x,y");
-  if(parser.EvalError() < 0)
+  int r = parser.Parse(formula, "x,y");
+  if(r >= 0)
   {
     std::cout << parser.ErrorMsg() << "\n\n";
   }
@@ -96,6 +93,7 @@ FunctionParser parsear_formula(string formula)
   {
     parser.Optimize();
   }
+
   return parser;
 }
 /**
@@ -124,9 +122,7 @@ Glib::RefPtr<Gdk::Pixbuf> graficar(guint32 width, guint32 height,
   FunctionParser funcionX = parsear_formula(formulaX);
   FunctionParser funcionY = parsear_formula(formulaY);
 
-  if(funcionX.EvalError() >= 0 && funcionY.EvalError() >= 0)
-  {
-    graficar_trayectorias(cr, funcionX, funcionY, p0, p1, semillas, iteraciones);
-  }
+  graficar_trayectorias(cr, funcionX, funcionY, p0, p1, semillas, iteraciones);
+
   return Gdk::Pixbuf::create(imSur, 0, 0, width, height);
 }
