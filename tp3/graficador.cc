@@ -40,8 +40,8 @@ void graficar_trayectorias(Cairo::RefPtr<Cairo::Context> cr,
         if(norm > 0)
         {
           // Moverse por el vector normalizado
-          vars[0] += (newX / norm) * width / 100.;
-          vars[1] += (newY / norm) * width / 100.;
+          vars[0] += ((newX-vars[0]) / norm) * radio;
+          vars[1] += ((newY-vars[1]) / norm) * radio;
         }
         //cr->rel_line_to(vars[0], vars[1]);
         //cr->stroke();
@@ -49,7 +49,6 @@ void graficar_trayectorias(Cairo::RefPtr<Cairo::Context> cr,
         cr->arc(vars[0], vars[1], radio, 0,  2 * M_PI);
         cr->fill();
         cr->stroke();
-        cr->move_to(vars[0], vars[1]);
         alfa *= 1.2;
         radio *= 1.1;
       }
