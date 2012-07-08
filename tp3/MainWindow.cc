@@ -34,8 +34,8 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   m_refGlade->get_widget("chkPerturbar", m_pPerturbar);
   m_refGlade->get_widget("txtFormulaX", m_pFormulaX);
   m_refGlade->get_widget("txtFormulaY", m_pFormulaY);
-  m_pFormulaX->set_text("x*x*y");
-  m_pFormulaY->set_text("y*y*x");
+  m_pFormulaX->set_text("1/x");
+  m_pFormulaY->set_text("1/y");
   setupSpin(m_pXRange[0], -1000, 1000, 0.1, 0.5, m_p[0][0]);
   setupSpin(m_pXRange[1], -1000, 1000, 0.1, 0.5, m_p[1][1]);
   setupSpin(m_pYRange[0], -1000, 1000, 0.1, 0.5, m_p[0][0]);
