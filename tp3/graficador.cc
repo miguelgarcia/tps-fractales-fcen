@@ -68,8 +68,8 @@ void inicializar_cairo(Cairo::RefPtr<Cairo::Context> cr,
         guint32 width, guint32 height,
         double p0[], double p1[])
 {
-    //fondo blanco :)
-  cr->set_source_rgb(1, 1, 1);
+    //fondo negro :)
+  cr->set_source_rgb(0, 0, 0);
   cr->rectangle(0, 0, width, height);
   cr->fill();
   

@@ -95,7 +95,7 @@ bool MainWindow::on_image_mouse_move(GdkEventMotion *event)
   std::stringstream pos;
   pos << event->x / (double) m_pImage->get_pixbuf()->get_width() * (m_p[1][0] - m_p[0][0]) + m_p[0][0];
   pos << " , ";
-  pos << ((double) m_pImage->get_pixbuf()->get_height() - event->y) / (double) m_pImage->get_pixbuf()->get_height() * (m_p[1][1] - m_p[0][1]) + m_p[0][1];
+  pos << ((double) event->y) / (double) m_pImage->get_pixbuf()->get_height() * (m_p[1][1] - m_p[0][1]) + m_p[0][1];
   m_pPointerPosition->set_text(pos.str());
   return true;
 }
