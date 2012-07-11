@@ -10,3 +10,5 @@
 *.lai
 *.la
 *.a
+/tp3/nbproject/private/
+/tp4/nbproject/private/
