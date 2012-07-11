@@ -15,13 +15,13 @@
               <object class="GtkGrid" id="grid1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="n_rows">9</property>
+                <property name="n_rows">7</property>
                 <property name="n_columns">2</property>
                 <child>
                   <object class="GtkLabel" id="label2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Min X:</property>
+                    <property name="label" translatable="yes">R min:</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -34,7 +34,7 @@
                   <object class="GtkLabel" id="label3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Max X:</property>
+                    <property name="label" translatable="yes">R max:</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -44,7 +44,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="spinXMin">
+                  <object class="GtkSpinButton" id="spinRMin">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="max_length">8</property>
@@ -62,7 +62,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="spinXMax">
+                  <object class="GtkSpinButton" id="spinRMax">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="max_length">8</property>
@@ -80,7 +80,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="spinYMin">
+                  <object class="GtkSpinButton" id="spinImMin">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="max_length">8</property>
@@ -99,7 +99,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="spinYMax">
+                  <object class="GtkSpinButton" id="spinImMax">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="max_length">8</property>
@@ -121,7 +121,7 @@
                   <object class="GtkLabel" id="label1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Min Y:</property>
+                    <property name="label" translatable="yes">Im min:</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -134,7 +134,7 @@
                   <object class="GtkLabel" id="label4">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Max Y:</property>
+                    <property name="label" translatable="yes">Im max:</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -147,7 +147,7 @@
                   <object class="GtkLabel" id="label5">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Semillas:</property>
+                    <property name="label" translatable="yes">Blowup:</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -157,36 +157,10 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label8">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Y=</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">8</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkLabel" id="label7">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">X=</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">7</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label6">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Perturbar:</property>
+                    <property name="label" translatable="yes">f(z)=</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -199,7 +173,7 @@
                   <object class="GtkLabel" id="label9">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Iteraciones:</property>
+                    <property name="label" translatable="yes">Max Iteraciones:</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -209,27 +183,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="spinSemillas">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="editable">False</property>
-                    <property name="max_length">5</property>
-                    <property name="invisible_char">•</property>
-                    <property name="invisible_char_set">True</property>
-                    <property name="progress_fraction">1</property>
-                    <property name="progress_pulse_step">1</property>
-                    <property name="climb_rate">1</property>
-                    <property name="numeric">True</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">4</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSpinButton" id="spinIteraciones">
+                  <object class="GtkSpinButton" id="spinMaxIteraciones">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
@@ -249,15 +203,10 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="chkPerturbar">
+                  <object class="GtkEntry" id="txtFz">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="xalign">0</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
+                    <property name="invisible_char">•</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -267,27 +216,20 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="txtFormulaX">
+                  <object class="GtkSpinButton" id="spinBlowup">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="max_length">8</property>
                     <property name="invisible_char">•</property>
+                    <property name="invisible_char_set">True</property>
+                    <property name="progress_fraction">0.01</property>
+                    <property name="climb_rate">0.050000000000000003</property>
+                    <property name="digits">8</property>
+                    <property name="numeric">True</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
-                    <property name="top_attach">7</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="txtFormulaY">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="invisible_char">•</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">8</property>
+                    <property name="top_attach">4</property>
                     <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>

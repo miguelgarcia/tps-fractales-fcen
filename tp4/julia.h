@@ -2,22 +2,22 @@
 #define JULIA_H
 
 #include <gtkmm.h>
-#include <complex>
-#include <fparser.hh>
+#include <string>
+#include "types.h"
 
 void julia_iteration(
   Glib::RefPtr<Gdk::Pixbuf> pixbuf,
-  FunctionParser_cd function,
-  std::complex<double> p0, std::complex<double> p1,
-  guint32 max_iter,
-  double blowup);
+  std::string function,
+  complex_d p0, complex_d p1,
+  double blowup,
+  guint32 max_iter);
 
 void julia_preimage(
   Glib::RefPtr<Gdk::Pixbuf> pixbuf,
   std::string funcionF,
-  std::complex<double> p0, std::complex<double> p1,
+  complex_d p0, complex_d p1,
   guint32 seeds,
-  guint32 max_iter,
-  double blowup);
+  double blowup,
+  guint32 max_iter);
 
 #endif

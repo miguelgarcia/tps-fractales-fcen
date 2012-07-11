@@ -1,7 +1,8 @@
 #include "MainWindow.h"
 #include <iostream>
 #include <sstream>
-#include "graficador.h"
+
+#include "julia.h"
 
 using namespace std;
 
@@ -18,30 +19,26 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   m_refGlade(refGlade),
   m_pBtnDraw(0)
 {
-  m_p[0][0] = -2;
-  m_p[0][1] = -2;
-  m_p[1][0] = 2;
-  m_p[1][1] = 2;
+  m_p[0] = complex_d(-2, -2);
+  m_p[1] = complex_d(2, 2);
+  
   m_refGlade->get_widget("btnDraw", m_pBtnDraw);
   m_refGlade->get_widget("image1", m_pImage);
   m_refGlade->get_widget("lblPointerPosition", m_pPointerPosition);
-  m_refGlade->get_widget("spinXMin", m_pXRange[0]);
-  m_refGlade->get_widget("spinXMax", m_pXRange[1]);
-  m_refGlade->get_widget("spinYMin", m_pYRange[0]);
-  m_refGlade->get_widget("spinYMax", m_pYRange[1]);
-  m_refGlade->get_widget("spinSemillas", m_pSemillas);
-  m_refGlade->get_widget("spinIteraciones", m_pIteraciones);
-  m_refGlade->get_widget("chkPerturbar", m_pPerturbar);
-  m_refGlade->get_widget("txtFormulaX", m_pFormulaX);
-  m_refGlade->get_widget("txtFormulaY", m_pFormulaY);
-  m_pFormulaX->set_text("1/x");
-  m_pFormulaY->set_text("1/y");
-  setupSpin(m_pXRange[0], -1000, 1000, 0.1, 0.5, m_p[0][0]);
-  setupSpin(m_pXRange[1], -1000, 1000, 0.1, 0.5, m_p[1][1]);
-  setupSpin(m_pYRange[0], -1000, 1000, 0.1, 0.5, m_p[0][0]);
-  setupSpin(m_pYRange[1], -1000, 1000, 0.1, 0.5, m_p[1][1]);
-  setupSpin(m_pSemillas, 1, 100000, 1, 5, 10);
-  setupSpin(m_pIteraciones, 1, 1000, 1, 5, 10);
+  m_refGlade->get_widget("spinRMin", m_pRRange[0]);
+  m_refGlade->get_widget("spinRMax", m_pRRange[1]);
+  m_refGlade->get_widget("spinImMin", m_pImRange[0]);
+  m_refGlade->get_widget("spinImMax", m_pImRange[1]);
+  m_refGlade->get_widget("spinBlowup", m_pBlowup);
+  m_refGlade->get_widget("spinMaxIteraciones", m_pMaxIteraciones);
+  m_refGlade->get_widget("txtFz", m_pFz);
+  m_pFz->set_text("z*z+(0,285+0,01i)");
+  setupSpin(m_pRRange[0], -4, 4, 0.025, 0.05, m_p[0].real());
+  setupSpin(m_pRRange[1], -4, 4, 0.025, 0.05, m_p[1].real());
+  setupSpin(m_pImRange[0], -4, 4, 0.025, 0.05, m_p[0].imag());
+  setupSpin(m_pImRange[1], -4, 4, 0.025, 0.05, m_p[1].imag());
+  setupSpin(m_pBlowup, 0, 16, 0.025, 0.05, 2);
+  setupSpin(m_pMaxIteraciones, 1, 255, 1, 3, 255);
 
   if(m_pBtnDraw)
   {
@@ -59,7 +56,7 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     false,
     8,
 		1024,
-		748
+		768
   );
   m_pImage->set(pbuf);
   on_button_draw();
@@ -71,31 +68,27 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_button_draw()
 {
-  m_p[0][0] = m_pXRange[0]->get_value();
-  m_p[1][0] = m_pXRange[1]->get_value();
-  m_p[0][1] = m_pYRange[0]->get_value();
-  m_p[1][1] = m_pYRange[1]->get_value();
-  unsigned int semillas = m_pSemillas->get_value();
-  unsigned int iteraciones = m_pIteraciones->get_value();
-  string formulaX = m_pFormulaX->get_text();
-  string formulaY = m_pFormulaY->get_text();
-
-  if(formulaX != "" && formulaY != "")
+  m_p[0].real(m_pRRange[0]->get_value());
+  m_p[1].real(m_pRRange[1]->get_value());
+  m_p[0].imag(m_pImRange[0]->get_value());
+  m_p[1].imag(m_pImRange[1]->get_value());
+  double blowup = m_pBlowup->get_value();
+  guint32 max_iteraciones = m_pMaxIteraciones->get_value();
+  string fz = m_pFz->get_text();
+  
+  if(fz != "")
   {
-    Glib::RefPtr<Gdk::Pixbuf> pixbuf = graficar(
-          m_pImage->get_pixbuf()->get_width(), m_pImage->get_pixbuf()->get_height(),
-          formulaX, formulaY,
-          m_p[0], m_p[1], semillas, iteraciones);
-    m_pImage->set(pixbuf);
+    julia_iteration(m_pImage->get_pixbuf(), fz, m_p[0], m_p[1], blowup, max_iteraciones);
+    m_pImage->set(m_pImage->get_pixbuf());
   }
 }
 
 bool MainWindow::on_image_mouse_move(GdkEventMotion *event)
 {
   std::stringstream pos;
-  pos << event->x / (double) m_pImage->get_pixbuf()->get_width() * (m_p[1][0] - m_p[0][0]) + m_p[0][0];
+  pos << event->x / (double) m_pImage->get_pixbuf()->get_width() * (m_p[1].real() - m_p[0].real()) + m_p[0].real();
   pos << " , ";
-  pos << ((double) event->y) / (double) m_pImage->get_pixbuf()->get_height() * (m_p[1][1] - m_p[0][1]) + m_p[0][1];
+  pos << ((double) event->y) / (double) m_pImage->get_pixbuf()->get_height() * (m_p[1].imag() - m_p[0].imag()) + m_p[0].imag();
   m_pPointerPosition->set_text(pos.str());
   return true;
 }

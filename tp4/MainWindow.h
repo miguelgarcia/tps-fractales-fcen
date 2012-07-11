@@ -2,7 +2,7 @@
 #define MAIN_WINDOW_H
 
 #include <gtkmm.h>
-
+#include "types.h"
 
 class MainWindow : public Gtk::Window
 {
@@ -20,15 +20,13 @@ protected:
   Gtk::Button* m_pBtnDraw;
   Gtk::Image* m_pImage;
   Gtk::Label *m_pPointerPosition;
-  Gtk::SpinButton *m_pXRange[2];
-  Gtk::SpinButton *m_pYRange[2];
-  Gtk::SpinButton *m_pSemillas;
-  Gtk::SpinButton *m_pIteraciones;
-  Gtk::CheckButton *m_pPerturbar;
-  Gtk::Entry *m_pFormulaX;
-  Gtk::Entry *m_pFormulaY;
+  Gtk::SpinButton *m_pRRange[2];
+  Gtk::SpinButton *m_pImRange[2];
+  Gtk::SpinButton *m_pBlowup;
+  Gtk::SpinButton *m_pMaxIteraciones;
+  Gtk::Entry *m_pFz;
 
-  double m_p[2][2];
+  complex_d m_p[2];
 };
 
 #endif
