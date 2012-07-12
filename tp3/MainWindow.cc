@@ -62,7 +62,6 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
 		748
   );
   m_pImage->set(pbuf);
-  on_button_draw();
 }
 
 MainWindow::~MainWindow()
