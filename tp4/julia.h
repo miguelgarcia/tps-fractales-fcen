@@ -12,6 +12,13 @@ void julia_iteration(
   double blowup,
   guint32 max_iter);
 
+void julia_inverse_iteration(
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf,
+  std::string function,
+  complex_d p0, complex_d p1,
+  double min_diff,
+  guint32 max_iter);
+
 void julia_preimage(
   Glib::RefPtr<Gdk::Pixbuf> pixbuf,
   std::string funcionF,

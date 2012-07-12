@@ -12,12 +12,14 @@ public:
 
 protected:
   //Signal handlers:
-  void on_button_draw();
+  void on_button_draw_iteracion_directa();
+  void on_button_draw_iteracion_inversa();
   bool on_image_mouse_move(GdkEventMotion *);
   bool on_image_mouse_click(GdkEventButton *);
 
   Glib::RefPtr<Gtk::Builder> m_refGlade;
-  Gtk::Button* m_pBtnDraw;
+  Gtk::Button* m_pBtnDrawIteracionDirecta;
+  Gtk::Button* m_pBtnDrawIteracionInversa;
   Gtk::Image* m_pImage;
   Gtk::Label *m_pPointerPosition;
   Gtk::SpinButton *m_pRRange[2];

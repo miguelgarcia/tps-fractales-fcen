@@ -1,5 +1,5 @@
 CCX=g++
-CXFLAGS=`pkg-config gtkmm-3.0 --cflags --libs` -I ../fparser/
+CXFLAGS=-g `pkg-config gtkmm-3.0 --cflags --libs` -I ../fparser/
 LIBS = ../fparser/fparser.o ../fparser/fpoptimizer.o
 
 OBJS = julia.o MainWindow.o main.o
