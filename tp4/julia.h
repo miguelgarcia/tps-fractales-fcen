@@ -24,7 +24,7 @@ void julia_preimage(
   Glib::RefPtr<Gdk::Pixbuf> pixbuf,
   std::string function,
   complex_d p0, complex_d p1,
-  guint32 iter,
+  guint32 iterations,
   guint32 seeds);
 
 #endif

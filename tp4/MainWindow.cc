@@ -32,6 +32,7 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   
   m_refGlade->get_widget("btnDrawIteracionDirecta", m_pBtnDrawIteracionDirecta);
   m_refGlade->get_widget("btnDrawIteracionInversa", m_pBtnDrawIteracionInversa);
+  m_refGlade->get_widget("btnDrawPreimagen", m_pBtnDrawPreimagen);
   m_refGlade->get_widget("image1", m_pImage);
   m_refGlade->get_widget("lblPointerPosition", m_pPointerPosition);
   m_refGlade->get_widget("spinRMin", m_pRRange[0]);
@@ -44,9 +45,13 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   m_pFz->set_text("z*z+(0,285+0,01i)");
   m_refGlade->get_widget("txtFzInv", m_pFzInv);
   m_pFzInv->set_text("z-(0,285+0,01i)");
+  m_refGlade->get_widget("txtFzPreimagen", m_pFzPreimagen);
+  m_pFzPreimagen->set_text("z-(0,285+0,01i)");
   m_refGlade->get_widget("spinMinDiffInv", m_pMinDiff);
   m_refGlade->get_widget("spinMaxIteracionesInv", m_pMaxIteracionesInv);
   m_refGlade->get_widget("spinSemillasInv", m_pSemillasInv);
+  m_refGlade->get_widget("spinIteracionesPreimagen", m_pMaxIteracionesPreimagen);
+  m_refGlade->get_widget("spinSemillasPreimagen", m_pSemillasPreimagen);
   setupSpin(m_pRRange[0], -4, 4, 0.025, 0.05, m_p[0].real());
   setupSpin(m_pRRange[1], -4, 4, 0.025, 0.05, m_p[1].real());
   setupSpin(m_pImRange[0], -4, 4, 0.025, 0.05, m_p[0].imag());
@@ -56,6 +61,8 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   setupSpin(m_pMinDiff, 0, 2, 0.025, 0.05, 0.05);
   setupSpin(m_pMaxIteracionesInv, 1, 100000, 1, 5, 1000);
   setupSpin(m_pSemillasInv, 1, 10000, 1, 5, 200);
+  setupSpin(m_pMaxIteracionesPreimagen, 1, 1000, 1, 5, 10);
+  setupSpin(m_pSemillasPreimagen, 1, 1000, 1, 5, 8);
   
   if(m_pBtnDrawIteracionDirecta)
   {
@@ -67,7 +74,11 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     m_pBtnDrawIteracionInversa->signal_clicked().connect( sigc::mem_fun(*this, &MainWindow::on_button_draw_iteracion_inversa) );
   }
   
-
+  if(m_pBtnDrawPreimagen)
+  {
+    m_pBtnDrawPreimagen->signal_clicked().connect( sigc::mem_fun(*this, &MainWindow::on_button_draw_preimagen) );
+  }
+  
   Glib::RefPtr<Gdk::Pixbuf> pbuf = Gdk::Pixbuf::create(
     Gdk::COLORSPACE_RGB ,
     false,
@@ -114,6 +125,20 @@ void MainWindow::on_button_draw_iteracion_inversa()
   {
     Glib::RefPtr<Gdk::Pixbuf> result = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, m_pImage->get_width(), m_pImage->get_height());
     julia_inverse_iteration(result, fz, m_p[0], m_p[1], min_diff, max_iteraciones, semillas);
+    m_pImage->set(result);
+  }
+}
+
+void MainWindow::on_button_draw_preimagen()
+{
+  updateDrawRange();
+  guint32 iteraciones = m_pMaxIteracionesPreimagen->get_value();
+  guint32 semillas = m_pSemillasPreimagen->get_value();
+  string fz = m_pFzPreimagen->get_text();
+  if(fz != "")
+  {
+    Glib::RefPtr<Gdk::Pixbuf> result = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, m_pImage->get_width(), m_pImage->get_height());
+    julia_preimage(result, fz, m_p[0], m_p[1], iteraciones, semillas);
     m_pImage->set(result);
   }
 }
