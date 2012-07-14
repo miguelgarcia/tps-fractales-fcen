@@ -8,22 +8,21 @@ double norm(complex_d x)
   return sqrt((x.real() * x.real() + x.imag() * x.imag()));
 }
 
-complex_d rsqrt(const complex_d *z)
+complex_d rsqrt(const complex_d z)
 {
   if((rand() % 2) == 0)
   {
-    return sqrt(*z);
+    return sqrt(z);
   }
   else
   {
-    return -sqrt(*z);
+    return -sqrt(z);
   }
 }
 
 FunctionParser_cd parse_function(std::string formula)
 {
   FunctionParser_cd parser;
-  parser.AddFunction("rsqrt", rsqrt, 1);
   int r = parser.Parse(formula, "z");
   if(r >= 0)
   {
@@ -77,7 +76,8 @@ void julia_inverse_iteration(
   std::string function,
   std::complex<double> p0, std::complex<double> p1,
   double min_diff,
-  guint32 max_iter)
+  guint32 max_iter,
+  guint32 seeds)
 {
   FunctionParser_cd fz = parse_function(function);
   
@@ -89,16 +89,17 @@ void julia_inverse_iteration(
   double real_inc = (p1.real() - p0.real()) / ((double) img_width);
   double im_inc = (p1.imag() - p0.imag()) / ((double) img_height);
   complex_d vars[1], new_z;
-  guint seeds;
-  for(seeds=0;seeds < 300; seeds++)
+  guint32 i, iter;
+  double diff;
+  
+  for(i=0;i < seeds; i++)
   {
     vars[0] = complex_d((rand() % img_width) * real_inc + p0.real(), (rand() % img_height)* im_inc + p0.imag());
-    guint32 iter;
-    max_iter = 10000;
-    for(iter = 0; iter < max_iter; iter++)
+    diff = 1000;
+    for(iter = 0; iter < max_iter && diff > min_diff; iter++)
     {
-      new_z = fz.Eval(vars);
-    //      diff = norm(new_z - vars[0]);
+      new_z = rsqrt(fz.Eval(vars));
+      diff = norm(new_z - vars[0]);
       vars[0] = new_z;
 
       if(iter > 50)
@@ -109,9 +110,9 @@ void julia_inverse_iteration(
         if(px >= 0 && px < img_width && py >= 0 && py < img_height)
         {
           if(image[py * rowstride + px * 3] < 255)
-            image[py * rowstride + px * 3] += 5;// = 255;
-          if(image[py * rowstride + px * 3 + 1] < 250)
-            image[py * rowstride + px * 3 + 1] += 10;// = 255;
+            image[py * rowstride + px * 3] += 15;// = 255;
+          if(image[py * rowstride + px * 3 + 1] < 255)
+            image[py * rowstride + px * 3 + 1] += 15;// = 255;
           if(image[py * rowstride + px * 3 + 2] < 255)
             image[py * rowstride + px * 3 + 2] += 15;// = 255;
         }
