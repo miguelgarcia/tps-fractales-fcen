@@ -8,7 +8,7 @@
 
 using namespace std;
 
-FunctionParser_cd parse_function(std::string formula)
+FunctionParser_cd parse_function_julia(std::string formula)
 {
   FunctionParser_cd parser;
   int r = parser.Parse(formula, "z");
@@ -36,7 +36,7 @@ FunctionParser_cd parse_function(std::string formula)
  * @param blowup
  * @param max_iter
  */
-void julia_iteration(
+void julia_direct_iteration(
   guint32 *output,
   guint32 width,
   guint32 height,
@@ -45,7 +45,7 @@ void julia_iteration(
   double blowup,
   guint32 max_iter)
 {
-  FunctionParser_cd fz = parse_function(function);
+  FunctionParser_cd fz = parse_function_julia(function);
 
   double real_inc = (p1.real() - p0.real()) / ((double) width);
   double im_inc = (p1.imag() - p0.imag()) / ((double) height);
@@ -76,7 +76,7 @@ void julia_inverse_iteration(
   guint32 max_iter,
   guint32 seeds)
 {
-  FunctionParser_cd fz = parse_function(function);
+  FunctionParser_cd fz = parse_function_julia(function);
 
   double real_inc = (p1.real() - p0.real()) / ((double) width);
   double im_inc = (p1.imag() - p0.imag()) / ((double) height);
@@ -113,7 +113,7 @@ void julia_preimage(
   guint32 iterations,
   guint32 init_seeds)
 {
-  FunctionParser_cd fz = parse_function(function);
+  FunctionParser_cd fz = parse_function_julia(function);
 
   double real_inc = (p1.real() - p0.real()) / ((double) width);
   double im_inc = (p1.imag() - p0.imag()) / ((double) height);

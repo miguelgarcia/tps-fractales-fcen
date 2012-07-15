@@ -268,16 +268,45 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="btnDrawIteracionDirecta">
-                <property name="label" translatable="yes">Iteración directa</property>
+              <object class="GtkGrid" id="grid5">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
+                <property name="can_focus">False</property>
+                <property name="n_rows">1</property>
+                <property name="n_columns">2</property>
+                <child>
+                  <object class="GtkButton" id="btnDrawIteracionDirecta">
+                    <property name="label" translatable="yes">Julia iteración directa</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btnDrawMandelbrot">
+                    <property name="label" translatable="yes">Mandelbrot</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>
-                <property name="fill">False</property>
+                <property name="fill">True</property>
                 <property name="position">3</property>
               </packing>
             </child>
@@ -400,7 +429,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btnDrawIteracionInversa">
-                <property name="label" translatable="yes">Iteración inversa</property>
+                <property name="label" translatable="yes">Julia Iteración inversa</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -531,7 +560,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btnDrawPreimagen">
-                <property name="label" translatable="yes">Preimagen</property>
+                <property name="label" translatable="yes">Julia Preimagen</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

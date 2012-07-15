@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "julia.h"
+#include "mandelbrot.h"
 
 using namespace std;
 
@@ -35,6 +36,7 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   m_refGlade->get_widget("btnDrawIteracionDirecta", m_pBtnDrawIteracionDirecta);
   m_refGlade->get_widget("btnDrawIteracionInversa", m_pBtnDrawIteracionInversa);
   m_refGlade->get_widget("btnDrawPreimagen", m_pBtnDrawPreimagen);
+  m_refGlade->get_widget("btnDrawMandelbrot", m_pBtnDrawMandelbrot);
   m_refGlade->get_widget("image1", m_pImage);
   m_refGlade->get_widget("lblPointerPosition", m_pPointerPosition);
   m_refGlade->get_widget("spinRMin", m_pRRange[0]);
@@ -78,6 +80,11 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   {
     m_pBtnDrawPreimagen->signal_clicked().connect( sigc::mem_fun(*this, &MainWindow::on_button_draw_preimagen) );
   }
+
+  if(m_pBtnDrawMandelbrot)
+  {
+    m_pBtnDrawMandelbrot->signal_clicked().connect( sigc::mem_fun(*this, &MainWindow::on_button_draw_mandelbrot) );
+  }
   
   Glib::RefPtr<Gdk::Pixbuf> pbuf = Gdk::Pixbuf::create(
     Gdk::COLORSPACE_RGB ,
@@ -112,7 +119,7 @@ void MainWindow::on_button_draw_iteracion_directa()
   if(fz != "")
   {
     result = new guint32[height * width];
-    julia_iteration(result, width, height, fz, m_p[0], m_p[1], blowup, max_iteraciones);
+    julia_direct_iteration(result, width, height, fz, m_p[0], m_p[1], blowup, max_iteraciones);
     paint(result, 1. / ((double) max_iteraciones));
     delete[] result;
   }
@@ -152,6 +159,24 @@ void MainWindow::on_button_draw_preimagen()
     result = new guint32[height * width];
     julia_preimage(result, width, height, fz, m_p[0], m_p[1], max_iteraciones, semillas);
     paint(result, 1. / ((double) max_iteraciones * semillas));
+    delete[] result;
+  }
+}
+
+void MainWindow::on_button_draw_mandelbrot()
+{
+  updateDrawRange();
+  double blowup = m_pBlowup->get_value();
+  guint32 max_iteraciones = m_pMaxIteraciones->get_value();
+  guint32 width = m_pImage->get_width();
+  guint32 height = m_pImage->get_height();
+  guint32 *result;
+  string fz = m_pFz->get_text();
+  if(fz != "")
+  {
+    result = new guint32[height * width];
+    mandelbrot_direct_iteration(result, width, height, fz, m_p[0], m_p[1], blowup, max_iteraciones);
+    paint(result, 1. / ((double) max_iteraciones));
     delete[] result;
   }
 }

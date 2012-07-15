@@ -5,7 +5,7 @@
 #include <string>
 #include "types.h"
 
-void julia_iteration(
+void julia_direct_iteration(
   guint32 *output,
   guint32 width,
   guint32 height,

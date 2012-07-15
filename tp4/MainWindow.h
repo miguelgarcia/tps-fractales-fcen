@@ -15,6 +15,7 @@ protected:
   void on_button_draw_iteracion_directa();
   void on_button_draw_iteracion_inversa();
   void on_button_draw_preimagen();
+  void on_button_draw_mandelbrot();
   bool on_image_mouse_move(GdkEventMotion *);
   bool on_image_mouse_click(GdkEventButton *);
 
@@ -24,6 +25,7 @@ protected:
   Gtk::Button* m_pBtnDrawIteracionDirecta;
   Gtk::Button* m_pBtnDrawIteracionInversa;
   Gtk::Button* m_pBtnDrawPreimagen;
+  Gtk::Button* m_pBtnDrawMandelbrot;
   Gtk::Image* m_pImage;
   Gtk::Label *m_pPointerPosition;
   Gtk::SpinButton *m_pRRange[2];

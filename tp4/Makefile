@@ -2,7 +2,7 @@ CCX=g++
 CXFLAGS=-g `pkg-config gtkmm-3.0 --cflags --libs` -I ../fparser/
 LIBS = ../fparser/fparser.o ../fparser/fpoptimizer.o
 
-OBJS = complex_utils.o julia.o MainWindow.o main.o
+OBJS = complex_utils.o julia.o mandelbrot.o MainWindow.o main.o
 BIN = tp4.a
 
 tp4:  $(OBJS)
