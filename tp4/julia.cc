@@ -1,4 +1,5 @@
 #include "julia.h"
+#include "complex_utils.h"
 #include <fparser.hh>
 #include <cmath>
 #include <iostream>
@@ -6,23 +7,6 @@
 #include <algorithm>
 
 using namespace std;
-
-double norm(complex_d x)
-{
-  return sqrt((x.real() * x.real() + x.imag() * x.imag()));
-}
-
-complex_d rsqrt(const complex_d z)
-{
-  if((rand() % 2) == 0)
-  {
-    return sqrt(z);
-  }
-  else
-  {
-    return -sqrt(z);
-  }
-}
 
 FunctionParser_cd parse_function(std::string formula)
 {
