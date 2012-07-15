@@ -19,6 +19,7 @@ protected:
   bool on_image_mouse_click(GdkEventButton *);
 
   void updateDrawRange();
+  void paint(guint32 *values, double scale);
   Glib::RefPtr<Gtk::Builder> m_refGlade;
   Gtk::Button* m_pBtnDrawIteracionDirecta;
   Gtk::Button* m_pBtnDrawIteracionInversa;
@@ -30,13 +31,13 @@ protected:
   Gtk::SpinButton *m_pBlowup;
   Gtk::SpinButton *m_pMaxIteraciones;
   Gtk::SpinButton *m_pMaxIteracionesInv;
-  Gtk::SpinButton *m_pMinDiff;
   Gtk::SpinButton *m_pSemillasInv;
   Gtk::SpinButton *m_pMaxIteracionesPreimagen;
   Gtk::SpinButton *m_pSemillasPreimagen;
   Gtk::Entry *m_pFz;
   Gtk::Entry *m_pFzInv;
   Gtk::Entry *m_pFzPreimagen;
+  Glib::RefPtr<Gdk::Pixbuf> m_Palette;
   
   complex_d m_p[2];
 };

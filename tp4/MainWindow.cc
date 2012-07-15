@@ -30,6 +30,8 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   m_p[0] = complex_d(-2, -2);
   m_p[1] = complex_d(2, 2);
   
+  m_Palette = Gdk::Pixbuf::create_from_file("palette1.png");
+  
   m_refGlade->get_widget("btnDrawIteracionDirecta", m_pBtnDrawIteracionDirecta);
   m_refGlade->get_widget("btnDrawIteracionInversa", m_pBtnDrawIteracionInversa);
   m_refGlade->get_widget("btnDrawPreimagen", m_pBtnDrawPreimagen);
@@ -47,7 +49,6 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   m_pFzInv->set_text("z-(0,285+0,01i)");
   m_refGlade->get_widget("txtFzPreimagen", m_pFzPreimagen);
   m_pFzPreimagen->set_text("z-(0,285+0,01i)");
-  m_refGlade->get_widget("spinMinDiffInv", m_pMinDiff);
   m_refGlade->get_widget("spinMaxIteracionesInv", m_pMaxIteracionesInv);
   m_refGlade->get_widget("spinSemillasInv", m_pSemillasInv);
   m_refGlade->get_widget("spinIteracionesPreimagen", m_pMaxIteracionesPreimagen);
@@ -58,7 +59,6 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   setupSpin(m_pImRange[1], -4, 4, 0.025, 0.05, m_p[1].imag());
   setupSpin(m_pBlowup, 0, 16, 0.025, 0.05, 2);
   setupSpin(m_pMaxIteraciones, 1, 255, 1, 3, 255);
-  setupSpin(m_pMinDiff, 0, 2, 0.025, 0.05, 0.05);
   setupSpin(m_pMaxIteracionesInv, 1, 100000, 1, 5, 1000);
   setupSpin(m_pSemillasInv, 1, 10000, 1, 5, 200);
   setupSpin(m_pMaxIteracionesPreimagen, 1, 1000, 1, 5, 10);
@@ -105,41 +105,54 @@ void MainWindow::on_button_draw_iteracion_directa()
   updateDrawRange();
   double blowup = m_pBlowup->get_value();
   guint32 max_iteraciones = m_pMaxIteraciones->get_value();
+  guint32 width = m_pImage->get_width();
+  guint32 height = m_pImage->get_height();
+  guint32 *result;
   string fz = m_pFz->get_text();
   if(fz != "")
   {
-    Glib::RefPtr<Gdk::Pixbuf> result = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, m_pImage->get_width(), m_pImage->get_height());
-    julia_iteration(result, fz, m_p[0], m_p[1], blowup, max_iteraciones);
-    m_pImage->set(result);
+    result = new guint32[height * width];
+    julia_iteration(result, width, height, fz, m_p[0], m_p[1], blowup, max_iteraciones);
+    paint(result, 1. / ((double) max_iteraciones));
+    delete[] result;
   }
 }
 
 void MainWindow::on_button_draw_iteracion_inversa()
 {
   updateDrawRange();
-  double min_diff = m_pMinDiff->get_value();
   guint32 max_iteraciones = m_pMaxIteracionesInv->get_value();
   guint32 semillas = m_pSemillasInv->get_value();
   string fz = m_pFzInv->get_text();
+  guint32 width = m_pImage->get_width();
+  guint32 height = m_pImage->get_height();
+  guint32 *result;
+  
   if(fz != "")
   {
-    Glib::RefPtr<Gdk::Pixbuf> result = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, m_pImage->get_width(), m_pImage->get_height());
-    julia_inverse_iteration(result, fz, m_p[0], m_p[1], min_diff, max_iteraciones, semillas);
-    m_pImage->set(result);
+    result = new guint32[height * width];
+    julia_inverse_iteration(result, width, height, fz, m_p[0], m_p[1], max_iteraciones, semillas);
+    paint(result, 1. / ((double) max_iteraciones));
+    delete[] result;
   }
 }
 
 void MainWindow::on_button_draw_preimagen()
 {
   updateDrawRange();
-  guint32 iteraciones = m_pMaxIteracionesPreimagen->get_value();
+  guint32 max_iteraciones = m_pMaxIteracionesPreimagen->get_value();
   guint32 semillas = m_pSemillasPreimagen->get_value();
   string fz = m_pFzPreimagen->get_text();
+  guint32 width = m_pImage->get_width();
+  guint32 height = m_pImage->get_height();
+  guint32 *result;
+  
   if(fz != "")
   {
-    Glib::RefPtr<Gdk::Pixbuf> result = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, m_pImage->get_width(), m_pImage->get_height());
-    julia_preimage(result, fz, m_p[0], m_p[1], iteraciones, semillas);
-    m_pImage->set(result);
+    result = new guint32[height * width];
+    julia_preimage(result, width, height, fz, m_p[0], m_p[1], max_iteraciones, semillas);
+    paint(result, 1. / ((double) max_iteraciones * semillas));
+    delete[] result;
   }
 }
 
@@ -155,4 +168,33 @@ bool MainWindow::on_image_mouse_move(GdkEventMotion *event)
 
 bool MainWindow::on_image_mouse_click(GdkEventButton *event)
 {
+}
+
+/**
+ * Pinta una matriz de valores sobre el pixbuf utilizando la paleta cargada
+ * 
+ * @param values
+ * @param scale
+ */
+void MainWindow::paint(guint32 *values, double scale)
+{
+  
+  guint32 y, x;
+  guint32 height = m_pImage->get_height(), width = m_pImage->get_width();
+  guint8 *pixels = m_pImage->get_pixbuf()->get_pixels();
+  guint8 *palette = m_Palette->get_pixels();
+  guint32 palette_width = m_Palette->get_width() - 1;
+  guint32 rowstride = m_pImage->get_pixbuf()->get_rowstride();
+  
+  for(y=0; y<height; y++)
+  {
+    for(x=0; x<width; x++)
+    {
+      guint32 idx = min(1., scale * values[y * width + x]) * palette_width;
+      pixels[y * rowstride + 3 * x] = palette[3 * idx];
+      pixels[y * rowstride + 3 * x + 1] = palette[3 * idx+1];
+      pixels[y * rowstride + 3 * x + 2] = palette[3 * idx+2];
+    }
+  }
+  m_pImage->set(m_pImage->get_pixbuf());
 }

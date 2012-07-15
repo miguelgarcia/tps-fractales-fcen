@@ -6,25 +6,31 @@
 #include "types.h"
 
 void julia_iteration(
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf,
+  guint32 *output,
+  guint32 width,
+  guint32 height,
   std::string function,
   complex_d p0, complex_d p1,
   double blowup,
-  guint32 max_iter);
+  guint32 max_iter
+);
 
 void julia_inverse_iteration(
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf,
+  guint32 *output,
+  guint32 width,
+  guint32 height,
   std::string function,
-  complex_d p0, complex_d p1,
-  double min_diff,
+  std::complex<double> p0, std::complex<double> p1,
   guint32 max_iter,
   guint32 seeds);
 
 void julia_preimage(
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf,
+  guint32 *output,
+  guint32 width,
+  guint32 height,
   std::string function,
   complex_d p0, complex_d p1,
   guint32 iterations,
-  guint32 seeds);
+  guint32 init_seeds);
 
 #endif
