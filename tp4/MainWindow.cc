@@ -7,6 +7,19 @@
 
 using namespace std;
 
+guint32 array_max(guint32 *array, guint32 size)
+{
+  guint32 max = array[0];
+  for(guint32 i=0; i<size;i++)
+  {
+    if(array[i] > max)
+    {
+      max = array[i];
+    }
+  }
+  return max;
+}
+
 void setupSpin(Gtk::SpinButton *spin, double min, double max,
     double incrementSmall, double incrementBig, double value)
 {
@@ -85,26 +98,38 @@ MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
   {
     m_pBtnDrawMandelbrot->signal_clicked().connect( sigc::mem_fun(*this, &MainWindow::on_button_draw_mandelbrot) );
   }
+
+  m_width = 1024;
+  m_height = 768;
+  m_result = new guint32[m_height * m_width];
   
   Glib::RefPtr<Gdk::Pixbuf> pbuf = Gdk::Pixbuf::create(
     Gdk::COLORSPACE_RGB ,
     false,
     8,
-		1024,
-		768
+		m_width,
+    m_height
   );
   m_pImage->set(pbuf);
   
   Gtk::Viewport *viewport;
   m_refGlade->get_widget("viewport1", viewport);
-  viewport->add_events(Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK);
+  viewport->add_events(Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
   viewport->signal_motion_notify_event().connect( sigc::mem_fun(*this, &MainWindow::on_image_mouse_move) );
-  viewport->signal_button_press_event().connect( sigc::mem_fun(*this, &MainWindow::on_image_mouse_click) );
-
+  viewport->signal_button_press_event().connect( sigc::mem_fun(*this, &MainWindow::on_image_mouse_down) );
+  viewport->signal_button_release_event().connect( sigc::mem_fun(*this, &MainWindow::on_image_mouse_up) );
+  
+  // Configurar menu
+  Gtk::MenuItem *mnuItem;
+  m_refGlade->get_widget("mnuAbrirPaleta", mnuItem);
+  mnuItem->signal_activate().connect(sigc::mem_fun(*this, &MainWindow::on_abrir_paleta));
+  
+  m_lastAction = NONE;
 }
 
 MainWindow::~MainWindow()
 {
+  delete [] m_result;
 }
 
 void MainWindow::on_button_draw_iteracion_directa()
@@ -112,17 +137,15 @@ void MainWindow::on_button_draw_iteracion_directa()
   updateDrawRange();
   double blowup = m_pBlowup->get_value();
   guint32 max_iteraciones = m_pMaxIteraciones->get_value();
-  guint32 width = m_pImage->get_width();
-  guint32 height = m_pImage->get_height();
-  guint32 *result;
   string fz = m_pFz->get_text();
   if(fz != "")
   {
-    result = new guint32[height * width];
-    julia_direct_iteration(result, width, height, fz, m_p[0], m_p[1], blowup, max_iteraciones);
-    paint(result, 1. / ((double) max_iteraciones));
-    delete[] result;
+    zero_result();
+    julia_direct_iteration(m_result, m_width, m_height, fz, m_p[0], m_p[1], blowup, max_iteraciones);
+    m_palette_scale = 1. / ((double) max_iteraciones);
+    paint();
   }
+  m_lastAction = JULIA_DIRECT_ITERATION;
 }
 
 void MainWindow::on_button_draw_iteracion_inversa()
@@ -131,17 +154,15 @@ void MainWindow::on_button_draw_iteracion_inversa()
   guint32 max_iteraciones = m_pMaxIteracionesInv->get_value();
   guint32 semillas = m_pSemillasInv->get_value();
   string fz = m_pFzInv->get_text();
-  guint32 width = m_pImage->get_width();
-  guint32 height = m_pImage->get_height();
-  guint32 *result;
   
   if(fz != "")
   {
-    result = new guint32[height * width];
-    julia_inverse_iteration(result, width, height, fz, m_p[0], m_p[1], max_iteraciones, semillas);
-    paint(result, 1. / ((double) max_iteraciones));
-    delete[] result;
+    zero_result();
+    julia_inverse_iteration(m_result, m_width, m_height, fz, m_p[0], m_p[1], max_iteraciones, semillas);
+    m_palette_scale = 2. / ((double) array_max(m_result, m_height * m_width));
+    paint();
   }
+    m_lastAction = JULIA_INVERSE_ITERATION;
 }
 
 void MainWindow::on_button_draw_preimagen()
@@ -150,17 +171,15 @@ void MainWindow::on_button_draw_preimagen()
   guint32 max_iteraciones = m_pMaxIteracionesPreimagen->get_value();
   guint32 semillas = m_pSemillasPreimagen->get_value();
   string fz = m_pFzPreimagen->get_text();
-  guint32 width = m_pImage->get_width();
-  guint32 height = m_pImage->get_height();
-  guint32 *result;
   
   if(fz != "")
   {
-    result = new guint32[height * width];
-    julia_preimage(result, width, height, fz, m_p[0], m_p[1], max_iteraciones, semillas);
-    paint(result, 1. / ((double) max_iteraciones * semillas));
-    delete[] result;
+    zero_result();
+    julia_preimage(m_result, m_width, m_height, fz, m_p[0], m_p[1], max_iteraciones, semillas);
+    m_palette_scale = 2. / ((double) array_max(m_result, m_height * m_width));
+    paint();
   }
+    m_lastAction = JULIA_PREIMAGE;
 }
 
 void MainWindow::on_button_draw_mandelbrot()
@@ -168,58 +187,131 @@ void MainWindow::on_button_draw_mandelbrot()
   updateDrawRange();
   double blowup = m_pBlowup->get_value();
   guint32 max_iteraciones = m_pMaxIteraciones->get_value();
-  guint32 width = m_pImage->get_width();
-  guint32 height = m_pImage->get_height();
-  guint32 *result;
   string fz = m_pFz->get_text();
+  
   if(fz != "")
   {
-    result = new guint32[height * width];
-    mandelbrot_direct_iteration(result, width, height, fz, m_p[0], m_p[1], blowup, max_iteraciones);
-    paint(result, 1. / ((double) max_iteraciones));
-    delete[] result;
+    zero_result();
+    mandelbrot_direct_iteration(m_result, m_width, m_height, fz, m_p[0], m_p[1], blowup, max_iteraciones);
+    m_palette_scale = 1. / ((double) max_iteraciones);
+    paint();
   }
+  m_lastAction = MANDELBROT;
 }
 
+complex_d MainWindow::img_coords_to_real(double x, double y)
+{
+  return complex_d(x / (double) m_width * (m_p[1].real() - m_p[0].real()) + m_p[0].real(),
+                   y / (double) m_height * (m_p[1].imag() - m_p[0].imag()) + m_p[0].imag());
+ 
+}
 bool MainWindow::on_image_mouse_move(GdkEventMotion *event)
 {
-  std::stringstream pos;
-  pos << event->x / (double) m_pImage->get_pixbuf()->get_width() * (m_p[1].real() - m_p[0].real()) + m_p[0].real();
-  pos << " , ";
-  pos << ((double) event->y) / (double) m_pImage->get_pixbuf()->get_height() * (m_p[1].imag() - m_p[0].imag()) + m_p[0].imag();
-  m_pPointerPosition->set_text(pos.str());
+  std::stringstream status;
+  status << img_coords_to_real(event->x, event->y);
+  status << " = " << m_result[min(m_height-1, (guint32) event->y) * m_width + min(m_width-1, (guint32) event->x)];
+  m_pPointerPosition->set_text(status.str());
   return true;
 }
 
-bool MainWindow::on_image_mouse_click(GdkEventButton *event)
+bool MainWindow::on_image_mouse_down(GdkEventButton *event)
 {
+  complex_d coord = img_coords_to_real(event->x, event->y);
+  m_pRRange[0]->set_value(coord.real());
+  m_pImRange[0]->set_value(coord.imag());
+  return true;
+}
+
+bool MainWindow::on_image_mouse_up(GdkEventButton *event)
+{
+  complex_d coord = img_coords_to_real(event->x, event->y);
+  if(m_pRRange[0]->get_value() > coord.real())
+  {
+    m_pRRange[1]->set_value(m_pRRange[0]->get_value());
+    m_pRRange[0]->set_value(coord.real());
+  }
+  else
+  {
+    m_pRRange[1]->set_value(coord.real());
+  }
+
+  if(m_pImRange[0]->get_value() > coord.imag())
+  {
+    m_pImRange[1]->set_value(m_pImRange[0]->get_value());
+    m_pImRange[0]->set_value(coord.imag());
+  }
+  else
+  {
+    m_pImRange[1]->set_value(coord.imag());
+  }
+  redo();
+  return true;
 }
 
 /**
  * Pinta una matriz de valores sobre el pixbuf utilizando la paleta cargada
  * 
- * @param values
  * @param scale
  */
-void MainWindow::paint(guint32 *values, double scale)
+void MainWindow::paint()
 {
   
   guint32 y, x;
-  guint32 height = m_pImage->get_height(), width = m_pImage->get_width();
   guint8 *pixels = m_pImage->get_pixbuf()->get_pixels();
   guint8 *palette = m_Palette->get_pixels();
   guint32 palette_width = m_Palette->get_width() - 1;
   guint32 rowstride = m_pImage->get_pixbuf()->get_rowstride();
   
-  for(y=0; y<height; y++)
+  for(y=0; y<m_height; y++)
   {
-    for(x=0; x<width; x++)
+    for(x=0; x<m_width; x++)
     {
-      guint32 idx = min(1., scale * values[y * width + x]) * palette_width;
+      guint32 idx = min(1., m_palette_scale * m_result[y * m_width + x]) * palette_width;
       pixels[y * rowstride + 3 * x] = palette[3 * idx];
       pixels[y * rowstride + 3 * x + 1] = palette[3 * idx+1];
       pixels[y * rowstride + 3 * x + 2] = palette[3 * idx+2];
     }
   }
   m_pImage->set(m_pImage->get_pixbuf());
+}
+
+void MainWindow::zero_result()
+{
+  memset(m_result, 0, m_height * m_width * sizeof(guint32));
+}
+
+void MainWindow::on_abrir_paleta()
+{
+  Gtk::FileChooserDialog dialog("Seleccione nueva paleta", Gtk::FILE_CHOOSER_ACTION_OPEN);
+  dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  dialog.add_button("Abrir", Gtk::RESPONSE_OK);
+  dialog.set_default_response(Gtk::RESPONSE_OK);
+  Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
+  filter->set_name("Imagenes");
+  filter->add_pixbuf_formats();
+  dialog.add_filter(filter);
+  if(dialog.run() == Gtk::RESPONSE_OK)
+  {
+    m_Palette =  Gdk::Pixbuf::create_from_file(dialog.get_filename());
+    paint();
+  }
+}
+
+void MainWindow::redo()
+{
+  switch(m_lastAction)
+  {
+    case JULIA_DIRECT_ITERATION:
+      on_button_draw_iteracion_directa();
+      break;
+    case JULIA_INVERSE_ITERATION:
+      on_button_draw_iteracion_inversa();
+      break;
+    case JULIA_PREIMAGE:
+      on_button_draw_preimagen();
+      break;
+    case MANDELBROT:
+      on_button_draw_mandelbrot();
+      break;
+  }
 }
