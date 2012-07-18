@@ -72,17 +72,28 @@ void MainWindow::paint()
   guint8 *palette = m_Palette->get_pixels();
   guint32 palette_width = m_Palette->get_width() - 1;
   guint32 rowstride = m_pImage->get_pixbuf()->get_rowstride();
-  
+  double mmax=-9999, mmin=9999;
   for(y=0; y<m_side; y++)
   {
     for(x=0; x<m_side; x++)
     {
-      guint32 idx = min(255., max(0., (m_result[y * m_side + x] + 1.) * 128.));
+      mmax = max(mmax,m_result[y * m_side + x]);
+      mmin = min(mmin,m_result[y * m_side + x]);
+    }
+  }
+  
+  double scale = 255. / (mmax - mmin);
+  for(y=0; y<m_side; y++)
+  {
+    for(x=0; x<m_side; x++)
+    {
+      guint32 idx = min(255., max(0., scale * (m_result[y * m_side + x] - mmin)));
       pixels[y * rowstride + 3 * x] = palette[3 * idx];
       pixels[y * rowstride + 3 * x + 1] = palette[3 * idx+1];
       pixels[y * rowstride + 3 * x + 2] = palette[3 * idx+2];
     }
   }
+  cout << mmax << " " << mmin << endl;
   m_pImage->set(m_pImage->get_pixbuf());
 }
 
