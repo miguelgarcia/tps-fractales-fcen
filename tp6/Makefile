@@ -5,7 +5,7 @@ LIBS =
 OBJS = GoL.o MainWindow.o main.o
 BIN = tp6.a
 
-tp4:  $(OBJS)
+tp6:  $(OBJS)
 	$(CXX) -o $(BIN) $(OBJS) $(LIBS) $(CXFLAGS)
 
 %.o: %.cc
