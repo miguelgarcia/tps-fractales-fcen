@@ -13,6 +13,8 @@ protected:
   //Signal handlers:
   void on_button_start();
   void on_button_stop();
+  bool on_timeout();
+  
   void paint();
   void init_grid();
   
@@ -21,12 +23,16 @@ protected:
   Gtk::Button* m_pBtnStop;
   Gtk::Image* m_pImage;
   Gtk::SpinButton *m_pMinLife;
+  Gtk::SpinButton *m_pMaxLife;
   Gtk::SpinButton *m_pMinBorn;
+  Gtk::SpinButton *m_pMaxBorn;
   Gtk::SpinButton *m_pPoblacion;
   
   Glib::RefPtr<Gdk::Pixbuf> m_Palette;
-  guint32 m_side;
+  int m_side;
   guint32 m_pixel_scale;
+  bool m_running;
+  guint32 m_refresh_millisecs;
   bool *m_grid;
   bool *m_tmp_grid;
 };

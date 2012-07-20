@@ -2,7 +2,7 @@ CCX=g++
 CXFLAGS=-g `pkg-config gtkmm-3.0 --cflags --libs`
 LIBS =
 
-OBJS = MainWindow.o main.o
+OBJS = GoL.o MainWindow.o main.o
 BIN = tp6.a
 
 tp4:  $(OBJS)
