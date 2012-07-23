@@ -107,8 +107,8 @@ void dibujar(IFSDefinition *ifs, guint32 iteraciones, Glib::RefPtr<Gdk::Pixbuf> 
     // convertir a pixeles
     int pixX = (x - ifs->minX) * x_scale;
     int pixY = (y - ifs->minY) * y_scale;
-    pixX = max(0, min(pixX, (int) ifs->img_width));
-    pixY = max(0, min(pixY, (int) ifs->img_height));
+    pixX = max(0, min(pixX, (int) ifs->img_width-1));
+    pixY = max(0, min(pixY, (int) ifs->img_height-1));
     pixels[pixY * rowstride + pixX * 3] = r;
     pixels[pixY * rowstride + pixX * 3 + 1] = g;
     pixels[pixY * rowstride + pixX * 3 + 2] = b;
